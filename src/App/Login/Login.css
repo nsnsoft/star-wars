@@ -6,12 +6,12 @@
   align-items: center;
 }
 
-.loginForm {
+.login__form {
   display: flex;
   flex-flow: column;
   align-items: center;
 }
 
-span.error {
+span.login__error {
   color: red;
 }

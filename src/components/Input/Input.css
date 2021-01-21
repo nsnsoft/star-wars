@@ -1,8 +1,25 @@
 .input {
   margin: 0.5em 1em;
+  border-bottom: 1px solid black;
+  padding: 1em 0em 0em;
+  position: relative;
+}
+
+.input:focus-within {
+  border-bottom: 2px solid green;
 }
 
 .input input {
   font-size: 1.5em;
   border-radius: 0.3em;
+  border: none;
+}
+
+.input input:focus {
+  outline: none;
+}
+
+.input__label {
+  position: absolute;
+  top: 0;
 }

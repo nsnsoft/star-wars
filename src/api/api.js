@@ -1,34 +1,38 @@
+const BASE_URL = "https://swapi.dev/api";
+
+const searchEntity = async (entity, searchTerm) => {
+  try {
+    const rawResult = await fetch(
+      `${BASE_URL}/${entity}/?search=${searchTerm}`
+    );
+    const { results } = await rawResult.json();
+    console.log({ [entity]: results });
+    return results;
+  } catch (ex) {
+    console.warn("api error", ex);
+    return [];
+  }
+};
+
 const login = async (userName, password) => {
   const loweredUserName = userName.toLowerCase();
 
   if (!loweredUserName || !password) {
-    throw "Fields cannot be left blank!";
+    throw new Error("Fields cannot be left blank!");
   }
-
-  const rawResult = await fetch(
-    `https://swapi.dev/api/people/?search=${loweredUserName}`
-  );
-  const { results } = await rawResult.json();
-  console.log({ results });
+  const results = await searchEntity("people", loweredUserName);
   if (
     !results.some(
       ({ name, birth_year }) =>
         name.toLowerCase() === loweredUserName && birth_year === password
     )
   ) {
-    throw "Invalid credentials";
+    throw new Error("Invalid credentials");
   }
 };
 
 const searchPlanets = async (searchString) => {
-  if (!searchString) {
-    return [];
-  }
-  const rawResult = await fetch(
-    `https://swapi.dev/api/planets/?search=${searchString}`
-  );
-  const { results } = await rawResult.json();
-  console.log({ results });
+  const results = await searchEntity("planets", searchString);
   return results;
 };
 

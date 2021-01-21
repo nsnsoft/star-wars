@@ -4,6 +4,7 @@ import "./Input.css";
 const Input = ({ value, onChange, label }) => {
   return (
     <div className="input">
+      {value && <div className="input__label">{label}</div>}
       <input
         type="text"
         value={value}

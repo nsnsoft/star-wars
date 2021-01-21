@@ -24,7 +24,7 @@ const Login = () => {
     <div className="login">
       <h2>Please Login</h2>
       <form
-        className="loginForm"
+        className="login__form"
         onSubmit={async (event) => {
           event.preventDefault();
           setPending(true);
@@ -32,7 +32,7 @@ const Login = () => {
             await login(userName, password);
             setUser({ isLoggedIn: true, name: userName });
           } catch (er) {
-            setError(er);
+            setError(er.message);
             setPending(false);
           }
         }}
@@ -47,7 +47,7 @@ const Login = () => {
           onChange={(value) => setPassword(value)}
           label="Password"
         />
-        {error && <span className="error">{error}</span>}
+        {error && <span className="login__error">{error}</span>}
         <Button disabled={pending} label="Login" type="submit" />
       </form>
     </div>

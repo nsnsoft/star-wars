@@ -25,6 +25,7 @@ function App() {
             <Route exact path="/">
               <Redirect to="/login" />
             </Route>
+            <Route render={() => <h2>404</h2>} />
           </Switch>
         </div>
       </UserContext.Provider>

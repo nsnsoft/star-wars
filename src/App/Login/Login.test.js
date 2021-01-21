@@ -33,13 +33,13 @@ describe("Login", () => {
       </MemoryRouter>
     );
 
-    const searchPageContent = await screen.getByText("Mock Search Page");
+    const searchPageContent = await screen.findByText("Mock Search Page");
     expect(searchPageContent).toBeInTheDocument();
   });
 
-  test("should display error message thrown from login", async () => {
+  test("should display error message thrown from login api", async () => {
     login.mockImplementation(async () => {
-      throw "Fields cannot be left blank!";
+      throw new Error("Fields cannot be left blank!");
     });
     render(
       <MemoryRouter>
@@ -53,11 +53,17 @@ describe("Login", () => {
 
     const button = screen.getByText("Login");
     expect(button).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("User Name"), {
+      target: { value: "Luke" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
+      target: { value: "" },
+    });
     await act(async () => {
       await fireEvent.click(button);
     });
-
-    expect(login).toBeCalledWith("Luke Skywalker", "19BBY");
+    expect(login).toBeCalledWith("Luke", "");
     expect(
       screen.getByText("Fields cannot be left blank!")
     ).toBeInTheDocument();
