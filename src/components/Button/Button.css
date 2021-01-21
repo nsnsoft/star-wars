@@ -8,7 +8,7 @@
   cursor: pointer;
 }
 
-button.button.button-disabled {
+button.button:disabled {
   background: #ffe1ab;
   cursor: default;
 }

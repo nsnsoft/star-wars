@@ -4,7 +4,7 @@
   align-items: center;
 }
 
-.planets {
+.search__planet_list {
   display: flex;
   flex-flow: column;
   align-items: center;

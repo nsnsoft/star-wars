@@ -57,7 +57,7 @@ const Search = () => {
         debouncedSearchString === searchString &&
         planets.length === 0 && <span>No planets found!</span>
       )}
-      <div className="planets">
+      <div className="search__planet_list">
         {planets.sort(_byPopulationSorter).map((planet, rank) => (
           <PlanetCard key={planet.name} {...planet} size={1 + rank * 0.1} />
         ))}
