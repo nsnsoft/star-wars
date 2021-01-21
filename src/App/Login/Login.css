@@ -1,0 +1,17 @@
+.login {
+  display: flex;
+  flex-flow: column;
+  border: 1px solid white;
+  max-width: 26em;
+  align-items: center;
+}
+
+.loginForm {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+span.error {
+  color: red;
+}

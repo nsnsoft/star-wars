@@ -1,0 +1,29 @@
+.search {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.planets {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.planetCard {
+  border: 1px solid #e6bc37;
+  width: 15em;
+  text-align: center;
+  margin: 0.1em;
+  box-shadow: 0px 0px 6px 1px #fff0be;
+  border-radius: 0.2em;
+}
+
+.planetCard__population {
+  font-size: 0.7em;
+  color: grey;
+}
+
+.planetCard__name {
+  font-weight: bold;
+}
