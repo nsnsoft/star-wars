@@ -7,8 +7,8 @@ import "./Login.css";
 
 const Login = () => {
   const { user, setUser } = useContext(UserContext);
-  const [userName, setUserName] = useState("Luke Skywalker");
-  const [password, setPassword] = useState("19BBY");
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
@@ -16,7 +16,7 @@ const Login = () => {
     setError("");
   }, [userName, password]);
 
-  if (user.isLoggedIn) {
+  if (user.accessToken) {
     return <Redirect to="/search" />;
   }
 
@@ -29,8 +29,12 @@ const Login = () => {
           event.preventDefault();
           setPending(true);
           try {
-            await login(userName, password);
-            setUser({ isLoggedIn: true, name: userName });
+            const { accessToken, plan } = await login(userName, password);
+            setUser({
+              name: userName,
+              accessToken,
+              plan,
+            });
           } catch (er) {
             setError(er.message);
             setPending(false);
@@ -46,6 +50,7 @@ const Login = () => {
           value={password}
           onChange={(value) => setPassword(value)}
           label="Password"
+          password
         />
         {error && <span className="login__error">{error}</span>}
         <Button disabled={pending} label="Login" type="submit" />

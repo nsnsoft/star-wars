@@ -13,7 +13,7 @@ import Search from "./Search";
 import "./App.css";
 
 function App() {
-  const [user, setUser] = useState({ name: "", isLoggedIn: false });
+  const [user, setUser] = useState({ name: "", accessToken: null, plan: null });
   return (
     <Router>
       <UserContext.Provider value={{ user, setUser }}>

@@ -8,7 +8,7 @@ const GuardedRoute = ({ component: Component, ...rest }) => {
     <Route
       {...rest}
       render={(props) => {
-        return user.isLoggedIn ? (
+        return user.accessToken ? (
           <Component {...props} />
         ) : (
           <Redirect to="/login" />

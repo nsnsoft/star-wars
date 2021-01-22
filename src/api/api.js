@@ -1,4 +1,8 @@
+import Consumer from "./Consumer";
+
 const BASE_URL = "https://swapi.dev/api";
+const QUOTA_PER_MINUTE = 15;
+const UNLIMITED_PLAN_USERS = ["luke skywalker"];
 
 const searchEntity = async (entity, searchTerm) => {
   try {
@@ -29,11 +33,36 @@ const login = async (userName, password) => {
   ) {
     throw new Error("Invalid credentials");
   }
+
+  const accessToken = JSON.stringify({ userName: loweredUserName });
+  return {
+    accessToken,
+    plan: UNLIMITED_PLAN_USERS.includes(loweredUserName)
+      ? "unlimited"
+      : `limited-${QUOTA_PER_MINUTE}`,
+  };
 };
 
-const searchPlanets = async (searchString) => {
-  const results = await searchEntity("planets", searchString);
-  return results;
+const isUnlimitedPlan = (accessToken) => {
+  const { userName } = JSON.parse(accessToken);
+  return UNLIMITED_PLAN_USERS.includes(userName);
+};
+
+let consumer = new Consumer(QUOTA_PER_MINUTE, 60 * 1000);
+
+const searchPlanets = async (searchString, accessToken) => {
+  if (!isUnlimitedPlan(accessToken)) {
+    const consumption = consumer.consume();
+    if (consumption.quota < 0) {
+      throw new Error(
+        `Search quota (${QUOTA_PER_MINUTE} searches per minute) exceeded. Please try after ${new Date(
+          consumption.lastRecharge + 60 * 1000
+        ).toLocaleTimeString()}`
+      );
+    }
+  }
+  const planets = await searchEntity("planets", searchString);
+  return { planets };
 };
 
 export { login, searchPlanets };

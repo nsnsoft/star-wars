@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import { searchPlanets } from "root/api";
 import { Input } from "root/components";
-import { useDebounce } from "root/hooks";
+import UserContext from "root/context/UserContext";
+import searchReducer from "./searchReducer";
 import "./Search.css";
 
 const _byPopulationSorter = ({ population: p1 }, { population: p2 }) => {
@@ -19,48 +20,76 @@ const PlanetCard = ({ name, population, size }) => {
   );
 };
 
+const PlanDetails = ({ name, plan }) => {
+  return (
+    <div className="plan_details">
+      {name},{" "}
+      {plan === "unlimited"
+        ? "you can have unlimited searches"
+        : `your search is limited to ${plan.split("-")[1]} per minute`}
+    </div>
+  );
+};
+
 const Search = () => {
-  const [searchString, setSearchString] = useState("");
-  const [pending, setPending] = useState(false);
-  const [planets, setPlanets] = useState([]);
-  const debouncedSearchString = useDebounce(searchString, 1000);
+  const { user } = useContext(UserContext);
+
+  const [state, dispatch] = useReducer(searchReducer, {
+    searchString: "",
+    planets: [],
+    pending: false,
+    notFound: false,
+    error: null,
+  });
 
   useEffect(() => {
     let cancelled = false;
     const getPlanets = async () => {
-      setPending(true);
-      const planetsFound = await searchPlanets(debouncedSearchString);
-      if (!cancelled) {
-        setPending(false);
-        setPlanets(planetsFound);
+      if (state.searchString) {
+        dispatch({ type: "FETCHING_PLANET_LIST" });
+        try {
+          const searchResult = await searchPlanets(
+            state.searchString,
+            user.accessToken
+          );
+          !cancelled &&
+            dispatch({ type: "PLANET_LIST_FETCHED", payload: searchResult });
+        } catch (ex) {
+          !cancelled &&
+            dispatch({ type: "PLANET_LIST_FETCH_FAILED", payload: ex.message });
+        }
+      } else {
+        dispatch({ type: "CLEAR_PLANET_LIST" });
       }
     };
-
-    debouncedSearchString ? getPlanets() : setPlanets([]);
+    const timeoutHandle = setTimeout(getPlanets, 1000);
     return () => {
       cancelled = true;
+      clearTimeout(timeoutHandle);
     };
-  }, [debouncedSearchString]);
+  }, [state.searchString, user.accessToken]);
 
   return (
     <div className="search">
       <h2>Search Planets</h2>
+      <PlanDetails {...user} />
       <Input
-        value={searchString}
+        value={state.searchString}
         label="Type to search"
-        onChange={(value) => setSearchString(value)}
+        onChange={(value) =>
+          dispatch({ type: "UPDATE_SEARCH_STRING", payload: { value } })
+        }
+        pending={state.pending}
       />
-      {pending ? (
-        <span style={{ marginBottom: "1em" }}>Updating...</span>
-      ) : (
-        searchString &&
-        debouncedSearchString === searchString &&
-        planets.length === 0 && <span>No planets found!</span>
-      )}
+      {state.notFound && <span>No planets found!</span>}
+      {state.error && <span className="search__error">{state.error}</span>}
       <div className="search__planet_list">
-        {planets.sort(_byPopulationSorter).map((planet, rank) => (
-          <PlanetCard key={planet.name} {...planet} size={1 + rank * 0.1} />
-        ))}
+        {!state.error &&
+          state.planets
+            .sort(_byPopulationSorter)
+            .map((planet, rank) => (
+              <PlanetCard key={planet.name} {...planet} size={1 + rank * 0.1} />
+            ))}
       </div>
     </div>
   );

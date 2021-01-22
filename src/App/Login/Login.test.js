@@ -14,7 +14,7 @@ describe("Login", () => {
   test("renders login form when user is not logged in", () => {
     render(
       <MemoryRouter>
-        <UserContext.Provider value={{ user: { isLoggedIn: false } }}>
+        <UserContext.Provider value={{ user: { accessToken: null } }}>
           <Login />
         </UserContext.Provider>
       </MemoryRouter>
@@ -23,10 +23,10 @@ describe("Login", () => {
     expect(loginHeader).toBeInTheDocument();
   });
 
-  test("redirects to search page when user is logged in", async () => {
+  test("redirects to search page when user have accessToken", async () => {
     render(
       <MemoryRouter>
-        <UserContext.Provider value={{ user: { isLoggedIn: true } }}>
+        <UserContext.Provider value={{ user: { accessToken: "fakeToken" } }}>
           <Login />
           <Route path="/search" render={() => <div>Mock Search Page</div>} />
         </UserContext.Provider>
@@ -44,8 +44,34 @@ describe("Login", () => {
     render(
       <MemoryRouter>
         <UserContext.Provider
-          value={{ user: { isLoggedIn: false }, setUser: () => true }}
+          value={{ user: { accessToken: null }, setUser: () => true }}
         >
+          <Login />
+        </UserContext.Provider>
+      </MemoryRouter>
+    );
+
+    const button = screen.getByText("Login");
+    expect(button).toBeInTheDocument();
+
+    await act(async () => {
+      await fireEvent.click(button);
+    });
+
+    expect(login).toBeCalledWith("", "");
+    expect(
+      screen.getByText("Fields cannot be left blank!")
+    ).toBeInTheDocument();
+  });
+
+  test("should call setUser after successful login", async () => {
+    login.mockImplementation(async () => {
+      return { accessToken: "fakeToken", plan: "unlimited" };
+    });
+    const setUser = jest.fn();
+    render(
+      <MemoryRouter>
+        <UserContext.Provider value={{ user: { accessToken: null }, setUser }}>
           <Login />
         </UserContext.Provider>
       </MemoryRouter>
@@ -58,14 +84,16 @@ describe("Login", () => {
       target: { value: "Luke" },
     });
     fireEvent.change(screen.getByPlaceholderText("Password"), {
-      target: { value: "" },
+      target: { value: "pass" },
     });
     await act(async () => {
       await fireEvent.click(button);
     });
-    expect(login).toBeCalledWith("Luke", "");
-    expect(
-      screen.getByText("Fields cannot be left blank!")
-    ).toBeInTheDocument();
+    expect(login).toBeCalledWith("Luke", "pass");
+    expect(setUser).toBeCalledWith({
+      accessToken: "fakeToken",
+      name: "Luke",
+      plan: "unlimited",
+    });
   });
 });
